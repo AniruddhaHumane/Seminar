@@ -1,0 +1,1017 @@
+Windows PowerShell
+Copyright (C) 2016 Microsoft Corporation. All rights reserved.
+
+PS C:\Users\ADMIN> cd 'G:\GitHub Projects\Seminar\material\ddowey'
+PS G:\GitHub Projects\Seminar\material\ddowey> ipython
+Python 3.6.0 |Anaconda 4.3.0 (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)]
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]:
+   ...:     #turn off all ticks
+   ...:     ax.yaxis.set_ticks_position('none')
+   ...:     ax.xaxis.set_ticks_position('none')
+   ...:
+   ...:     #now re-enable visibles
+   ...:     if top:
+   ...:         ax.xaxis.tick_top()
+   ...:     if bottom:
+   ...:         ax.xaxis.tick_bottom()
+   ...:     if left:
+   ...:         ax.yaxis.tick_left()
+   ...:     if right:
+   ...:         ax.yaxis.tick_right()
+   ...:
+   ...: pd.set_option('display.width', 500)
+   ...: pd.set_option('display.max_columns', 100)
+   ...:
+   ...: #----- plot confustion matrix function
+   ...: def show_confusion_matrix(cm):
+   ...:     plt.figure(figsize=(6, 6))
+   ...:     plt.imshow(cm, interpolation='nearest', cmap=plt.
+   ...: cm.binary)
+   ...:     plt.title('Confusion matrix')
+   ...:     plt.set_cmap('Blues')
+   ...:     plt.colorbar()
+   ...:
+   ...:     target_names = ['Not Delayed', 'Delayed']
+   ...:
+   ...:     tick_marks = np.arange(len(target_names))
+   ...:     plt.xticks(tick_marks, target_names, rotation=60)
+   ...:
+   ...:     plt.yticks(tick_marks, target_names)
+   ...:     plt.ylabel('True label')
+   ...:     plt.xlabel('Predicted label')
+   ...:     # Convenience function to adjust plot parameters
+   ...: for a clear layout.
+   ...:
+
+In [2]:
+
+In [2]: #-----Read data from 2008
+   ...: flt2008=pd.read_csv('2008.csv')
+   ...: print("shape of dataset : ", flt2008.shape)
+   ...: print("Features in dataset : ", flt2008.columns)
+   ...: print("No of features in dataset : ", flt2008.columns
+   ...: .shape)
+   ...: # shape of dataset : s(7009728, 29)
+   ...: # Features in dataset :  Index(['Year', 'Month', 'Day
+   ...: ofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime', 'ArrT
+   ...: ime', 'CRSArrTime', 'UniqueCarrier', 'FlightNum', 'Ta
+   ...: ilNum', 'ActualElapsedTime', 'CRSElapsedTime', 'AirTi
+   ...: me', 'ArrDelay', 'DepDelay', 'Origin', 'Dest', 'Dista
+   ...: nce', 'TaxiIn', 'TaxiOut', 'Cancelled', 'Cancellation
+   ...: Code', 'Diverted', 'CarrierDelay', 'WeatherDelay', 'N
+   ...: ASDelay', 'SecurityDelay', 'LateAircraftDelay'], dtyp
+   ...: e='object')
+   ...: # No of features in dataset : (29,)
+   ...: #-----Excluding Cancelled flights as they do not have
+   ...:  any delay attribute
+   ...: flt2008 = flt2008[flt2008['Cancelled']==0]
+   ...: flt2008.drop(['Cancelled', 'CancellationCode', 'Carri
+   ...: erDelay', 'WeatherDelay', 'NASDelay', 'SecurityDelay'
+   ...: , 'LateAircraftDelay'], axis=1, inplace=True)
+   ...:
+   ...: #-----Generating Departure and Arrival time in hrs
+   ...: flt2008['DepHr'] = flt2008['CRSDepTime']//100
+   ...: flt2008['ArrHr'] = flt2008['CRSArrTime']//100
+   ...:
+shape of dataset :  (7009728, 29)
+Features in dataset :  Index(['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime', 'ArrTime', 'CRSArrTime', 'U
+niqueCarrier', 'FlightNum', 'TailNum', 'ActualElapsedTime', 'CRSElapsedTime', 'AirTime', 'ArrDelay', 'DepDelay', 'Origin', 'De
+st', 'Distance', 'TaxiIn', 'TaxiOut', 'Cancelled', 'CancellationCode', 'Diverted', 'CarrierDelay', 'WeatherDelay', 'NASDelay',
+ 'SecurityDelay', 'LateAircraftDelay'], dtype='object')
+No of features in dataset :  (29,)
+
+In [3]: else:
+   ...:     # select Features for Arrival Delays
+   ...:     Xcols = ['Month', 'DayOfWeek', 'DepHr', 'ArrHr',
+   ...: 'UniqueCarrier', 'Origin', 'CRSElapsedTime', 'Distanc
+   ...: e']
+   ...:
+   ...: #----- Extracting important ORD data from original da
+   ...: taset
+   ...: X_values = flt2008[flt2008[direction] == 'ORD'][Xcols
+   ...: ]
+   ...: Y_values = flt2008[flt2008[direction] == 'ORD'][Ycol]
+   ...:
+   ...:
+   ...: # Factorise the qualitative variables (Giving unique
+   ...: index to Features and using them instead of actual st
+   ...: rings)
+   ...: X_values['UniqueCarrier'] = pd.factorize(X_values['Un
+   ...: iqueCarrier'])[0]
+   ...:
+   ...: if direction == 'Origin':
+   ...:     X_values['Dest'] = pd.factorize(X_values['Dest'])
+   ...: [0]
+   ...: else:
+   ...:     X_values['Origin'] = pd.factorize(X_values['Origi
+   ...: n'])[0]
+   ...:
+   ...: #----- Selecting random 20k samples and segregating t
+   ...: hem
+   ...: rows = np.random.choice(X_values.index.values, 20000)
+   ...:
+   ...: sampled_X = X_values.ix[rows]
+   ...: sampled_Y = Y_values.ix[rows]
+   ...:
+   ...: TrainX, TestX, TrainY, TestY = train_test_split(
+   ...:     sampled_X, sampled_Y, test_size=0.50, random_stat
+   ...: e=42)
+   ...:
+
+
+In [4]: X_values.shape
+Out[4]: (335330, 8)
+
+In [5]: clf_rf = RandomForestClassifier(n_estimators=70, n_jo
+   ...: bs=-1)
+   ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshold
+   ...: ,1,0))
+   ...:
+   ...: #---- Evaluate on test set
+   ...: pred = clf_rf.predict(TestX)
+   ...:
+   ...: # print results and confusion matrix
+   ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thre
+   ...: shold,1,0), pred)
+   ...: print("Confusion matrix")
+   ...: print(pd.DataFrame(cm_rf))
+   ...: report_rf = precision_recall_fscore_support(list(np.w
+   ...: here(TestY >= delay_threshold,1,0)), list(pred), aver
+   ...: age='binary')
+   ...: print("\nprecision = %0.2f, recall = %0.2f, F1 = %0.2
+   ...: f, accuracy = %0.2f\n" % \
+   ...:         (report_rf[0], report_rf[1], report_rf[2], ac
+   ...: curacy_score(list(np.where(TestY >= delay_threshold,1
+   ...: ,0)), list(pred))))
+   ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.s
+   ...: um(axis=1)))
+   ...: show_confusion_matrix(cm_rf)
+   ...:
+Confusion matrix
+      0    1
+0  6230  934
+1  2039  797
+
+precision = 0.46, recall = 0.28, F1 = 0.35, accuracy = 0.70
+
+          0         1
+0  0.869626  0.329337
+1  0.284618  0.281030
+
+In [6]: # 3    ABQ  2008      1           5      3      V
+   ...:     130.0       10.00      37               3
+   ...: # 4    ABQ  2008      1           5      4      V
+   ...:     120.0       10.00      39               3
+   ...:
+   ...: #   Dest  Year  Month  DayofMonth  ArrHr MC_ARR  CEIL
+   ...: ING_ARR VISIBLE_ARR TEMP_ARR  Dest_Demand
+   ...: # 0  ABQ  2008      1           5      0      V
+   ...:   200.0       10.00      35             5
+   ...: # 1  ABQ  2008      1           5      1      V
+   ...:   130.0       10.00      37             2
+   ...: # 2  ABQ  2008      1           5      2      V
+   ...:   130.0       10.00      37             3
+   ...: # 3  ABQ  2008      1           5      3      V
+   ...:   130.0       10.00      37             3
+   ...: # 4  ABQ  2008      1           5      4      V
+   ...:   120.0       10.00      39             3
+   ...:
+   ...: #We check the types of resulting dataset. Some of the
+   ...:  variables are numeric values stored as text. We will
+   ...:  need to convert them to numeric in order to use in t
+   ...: he analysis.
+   ...: wx_arr.get_dtype_counts()
+   ...: # float64    1
+   ...: # int64      5
+   ...: # object     4
+   ...: # dtype: int64
+   ...:
+   ...: # Add Origin Information
+   ...: temp = pd.merge(flt2008, wx, on =['Origin', 'Year', '
+   ...: Month','DayofMonth','DepHr'], how ='inner')
+   ...: # Add Destination Information
+   ...: flt2008wtr = pd.merge(temp, wx_arr, on =['Dest', 'Yea
+   ...: r', 'Month','DayofMonth','ArrHr'], how ='inner')
+   ...: del temp, flt2008
+   ...: flt2008wtr.head().T
+   ...:
+
+F:\Software\Anaconda\Scripts\ipython-script.py:28: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+Out[6]:
+                        0       1       2       3       4
+Year                 2008    2008    2008    2008    2008
+Month                   1       1       1       1       1
+DayofMonth              3       3       3       3       3
+DayOfWeek               4       4       4       4       4
+DepTime              2003    2010    1901    1916    1934
+CRSDepTime           1955    1925    1855    1915    1930
+ArrTime              2211    2237    2155    2207    2159
+CRSArrTime           2225    2220    2210    2215    2204
+UniqueCarrier          WN      WN      WN      AA      CO
+FlightNum             335     929    3580     543     175
+TailNum            N712SW  N521SW  N206WN  N507AA  N16339
+ActualElapsedTime     128     147     174     171     145
+CRSElapsedTime        150     175     195     180     154
+AirTime               116     129     157     146     123
+ArrDelay              -14      17     -15      -8      -5
+DepDelay                8      45       6       1       4
+Origin                IAD     PHL     PVD     LGA     CLE
+Dest                  TPA     TPA     TPA     TPA     TPA
+Distance              810     920    1137    1011     927
+TaxiIn                  4       5       5       2       7
+TaxiOut                 8      13      12      23      15
+Diverted                0       0       0       0       0
+DepHr                  19      19      18      19      19
+ArrHr                  22      22      22      22      22
+MC_DEP                  V       V       V       V       V
+CEILING_DEP           NaN     NaN     NaN     NaN     NaN
+VISIBLE_DEP         10.00   10.00   10.00   10.00   10.00
+TEMP_DEP              25      23      13      20      18
+Origin_Demand          42      95      20      67      48
+MC_ARR                  V       V       V       V       V
+CEILING_ARR           NaN     NaN     NaN     NaN     NaN
+VISIBLE_ARR         10.00   10.00   10.00   10.00   10.00
+TEMP_ARR              42      42      42      42      42
+Dest_Demand            28      28      28      28      28
+
+In [7]: flt2008wtr.shape
+Out[7]: (4832058, 34)
+
+In [8]: flt2008wtr['VISIBLE_DEP'] = flt2008wtr['VISIBLE_DEP']
+   ...: .convert_objects(convert_numeric=True)
+   ...: flt2008wtr['VISIBLE_ARR'] = flt2008wtr['VISIBLE_ARR']
+   ...: .convert_objects(convert_numeric=True)
+   ...: flt2008wtr['CEILING_DEP'] = flt2008wtr['CEILING_DEP']
+   ...: .convert_objects(convert_numeric=True)
+   ...: flt2008wtr['CEILING_ARR'] = flt2008wtr['CEILING_ARR']
+   ...: .convert_objects(convert_numeric=True)
+   ...: flt2008wtr['TEMP_DEP'] = flt2008wtr['TEMP_DEP'].conve
+   ...: rt_objects(convert_numeric=True)
+   ...: flt2008wtr['TEMP_ARR'] = flt2008wtr['TEMP_ARR'].conve
+   ...: rt_objects(convert_numeric=True)
+   ...:
+F:\Software\Anaconda\Scripts\ipython-script.py:1: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  if __name__ == '__main__':
+F:\Software\Anaconda\Scripts\ipython-script.py:2: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  import sys
+F:\Software\Anaconda\Scripts\ipython-script.py:3: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  import IPython
+F:\Software\Anaconda\Scripts\ipython-script.py:4: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+
+F:\Software\Anaconda\Scripts\ipython-script.py:5: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+  sys.exit(IPython.start_ipython())
+F:\Software\Anaconda\Scripts\ipython-script.py:6: FutureWarning: convert_objects is deprecated.  Use the data-type specific co
+nverters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+
+In [9]: direction = 'Origin'
+   ...: #direction = 'Dest'
+   ...:
+   ...: Ycol = 'DepDelay'
+   ...:
+   ...: if direction == 'Origin':
+   ...:     # Features for Departure Delays
+   ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Uni
+   ...: queCarrier','Dest',
+   ...:                  'CRSElapsedTime','Distance', 'Origin
+   ...: _Demand', 'MC_DEP',
+   ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_De
+   ...: mand',
+   ...:                  'MC_ARR',  'VISIBLE_ARR', 'TEMP_ARR'
+   ...: ]#, 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SP
+   ...: ED_y']
+   ...: else:
+   ...:     # Features for Arrival Delays
+   ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Uni
+   ...: queCarrier','Origin',
+   ...:                  'CRSElapsedTime','Distance', 'Origin
+   ...: _Demand', 'MC_DEP',
+   ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_De
+   ...: mand',
+   ...:                  'MC_ARR', 'VISIBLE_ARR', 'TEMP_ARR']
+   ...: #, 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SPE
+   ...: D_y']
+   ...:
+   ...: # Specify frames for modelling
+   ...: cols = [direction]+[Ycol]+Xcols
+   ...:
+   ...: #Dropping NaN
+   ...: flt2008wtr =  flt2008wtr.dropna()
+   ...:
+   ...: #Extracting DataSet for future Demonstration
+   ...: flt2008wtr.to_csv("flt2008wtr.csv", sep="\t", encodin
+   ...: g="utf-8")
+   ...:
+
+In [10]: X_values = flt2008wtr[flt2008wtr[direction] == 'ORD'
+    ...: ][Xcols]
+    ...: Y_values = flt2008wtr[flt2008wtr[direction] == 'ORD'
+    ...: ][Ycol]
+    ...:
+
+In [11]: X_values.shape
+Out[11]: (84541, 16)
+
+In [12]: flt2008wtr.shape
+Out[12]: (1445150, 34)
+
+In [13]:
+    ...: Ycol = 'DepDelay'
+    ...:
+    ...: if direction == 'Origin':
+    ...:     # Features for Departure Delays
+    ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Un
+    ...: iqueCarrier','Dest',
+    ...:                  'CRSElapsedTime','Distance', 'Origi
+    ...: n_Demand', 'MC_DEP',
+    ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_D
+    ...: emand',
+    ...:                  'MC_ARR',  'VISIBLE_ARR', 'TEMP_ARR
+    ...: ', 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SP
+    ...: ED_y']
+    ...: else:
+    ...:     # Features for Arrival Delays
+    ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Un
+    ...: iqueCarrier','Origin',
+    ...:                  'CRSElapsedTime','Distance', 'Origi
+    ...: n_Demand', 'MC_DEP',
+    ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_D
+    ...: emand',
+    ...:                  'MC_ARR', 'VISIBLE_ARR', 'TEMP_ARR'
+    ...: , 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SPE
+    ...: D_y']
+    ...:
+    ...: # Specify frames for modelling
+    ...: cols = [direction]+[Ycol]+Xcols
+    ...:
+    ...: #Dropping NaN
+    ...: flt2008wtr =  flt2008wtr.dropna()
+    ...:
+    ...: #Extracting DataSet for future Demonstration
+    ...: flt2008wtr.to_csv("flt2008wtr.csv", sep="\t", encodi
+    ...: ng="utf-8")
+    ...:
+    ...:
+    ...:
+F:\Software\Anaconda\Scripts\ipython-script.py:28: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+--------------------------------------------------------------
+NameError                    Traceback (most recent call last)
+<ipython-input-13-ea441a79eca8> in <module>()
+     79
+     80 # Add Origin Information
+---> 81 temp = pd.merge(flt2008, wx, on =['Origin', 'Year', 'Month','DayofMonth','DepHr'], how ='inner')
+     82 # Add Destination Information
+     83 flt2008wtr = pd.merge(temp, wx_arr, on =['Dest', 'Year', 'Month','DayofMonth','ArrHr'], how ='inner')
+
+NameError: name 'flt2008' is not defined
+
+In [14]: #-----Read data from 2008
+    ...: flt2008=pd.read_csv('2008.csv')
+    ...: print("shape of dataset : ", flt2008.shape)
+    ...: print("Features in dataset : ", flt2008.columns)
+    ...: print("No of features in dataset : ", flt2008.column
+    ...: s.shape)
+    ...: # shape of dataset : s(7009728, 29)
+    ...: # Features in dataset :  Index(['Year', 'Month', 'Da
+    ...: yofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime', 'Ar
+    ...: rTime', 'CRSArrTime', 'UniqueCarrier', 'FlightNum',
+    ...: 'TailNum', 'ActualElapsedTime', 'CRSElapsedTime', 'A
+    ...: irTime', 'ArrDelay', 'DepDelay', 'Origin', 'Dest', '
+    ...: Distance', 'TaxiIn', 'TaxiOut', 'Cancelled', 'Cancel
+    ...: lationCode', 'Diverted', 'CarrierDelay', 'WeatherDel
+    ...: ay', 'NASDelay', 'SecurityDelay', 'LateAircraftDelay
+    ...: '], dtype='object')
+    ...: # No of features in dataset : (29,)
+    ...: #-----Excluding Cancelled flights as they do not hav
+    ...: e any delay attribute
+    ...: flt2008 = flt2008[flt2008['Cancelled']==0]
+    ...: flt2008.drop(['Cancelled', 'CancellationCode', 'Carr
+    ...: ierDelay', 'WeatherDelay', 'NASDelay', 'SecurityDela
+    ...: y', 'LateAircraftDelay'], axis=1, inplace=True)
+    ...:
+    ...: #-----Generating Departure and Arrival time in hrs
+    ...: flt2008['DepHr'] = flt2008['CRSDepTime']//100
+    ...: flt2008['ArrHr'] = flt2008['CRSArrTime']//100
+    ...:
+shape of dataset :  (7009728, 29)
+Features in dataset :  Index(['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime', 'ArrTime', 'CRSArrTime', 'U
+niqueCarrier', 'FlightNum', 'TailNum', 'ActualElapsedTime', 'CRSElapsedTime', 'AirTime', 'ArrDelay', 'DepDelay', 'Origin', 'De
+st', 'Distance', 'TaxiIn', 'TaxiOut', 'Cancelled', 'CancellationCode', 'Diverted', 'CarrierDelay', 'WeatherDelay', 'NASDelay',
+ 'SecurityDelay', 'LateAircraftDelay'], dtype='object')
+No of features in dataset :  (29,)
+
+In [15]:
+    ...: Ycol = 'DepDelay'
+    ...:
+    ...: if direction == 'Origin':
+    ...:     # Features for Departure Delays
+    ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Un
+    ...: iqueCarrier','Dest',
+    ...:                  'CRSElapsedTime','Distance', 'Origi
+    ...: n_Demand', 'MC_DEP',
+    ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_D
+    ...: emand',
+    ...:                  'MC_ARR',  'VISIBLE_ARR', 'TEMP_ARR
+    ...: ', 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SP
+    ...: ED_y']
+    ...: else:
+    ...:     # Features for Arrival Delays
+    ...:     Xcols = ['Month','DayOfWeek','DepHr','ArrHr','Un
+    ...: iqueCarrier','Origin',
+    ...:                  'CRSElapsedTime','Distance', 'Origi
+    ...: n_Demand', 'MC_DEP',
+    ...:                   'VISIBLE_DEP', 'TEMP_DEP', 'Dest_D
+    ...: emand',
+    ...:                  'MC_ARR', 'VISIBLE_ARR', 'TEMP_ARR'
+    ...: , 'WND_ANGL_x', 'WND_ANGL_y', 'WND_SPED_x', 'WND_SPE
+    ...: D_y']
+    ...:
+    ...: # Specify frames for modelling
+    ...: cols = [direction]+[Ycol]+Xcols
+    ...:
+    ...: #Dropping NaN
+    ...: flt2008wtr =  flt2008wtr.dropna()
+    ...:
+    ...: #Extracting DataSet for future Demonstration
+    ...: flt2008wtr.to_csv("flt2008wtr.csv", sep="\t", encodi
+    ...: ng="utf-8")
+    ...:
+    ...:
+    ...:
+F:\Software\Anaconda\Scripts\ipython-script.py:28: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+F:\Software\Anaconda\Scripts\ipython-script.py:179: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:180: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:181: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:182: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:183: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:184: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:185: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:186: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:187: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+F:\Software\Anaconda\Scripts\ipython-script.py:188: FutureWarning: convert_objects is deprecated.  Use the data-type specific
+converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.
+
+In [16]: X_values = flt2008wtr[flt2008wtr[direction] == 'ORD'
+    ...: ][Xcols]
+    ...: Y_values = flt2008wtr[flt2008wtr[direction] == 'ORD'
+    ...: ][Ycol]
+    ...:
+
+In [17]: X_values.shape
+Out[17]: (80954, 20)
+
+In [18]: X_values.head().T
+Out[18]:
+                1701 2038 2174 2175  2247
+Month              1    1    1    1     1
+DayOfWeek          4    4    4    4     4
+DepHr             14   14   14   13    14
+ArrHr             18   17   16   16    16
+UniqueCarrier     AA   UA   AA   NW    US
+Dest             MCO  IAH  DTW  DTW   PHX
+CRSElapsedTime   155  171   75   81   231
+Distance        1005  925  235  235  1440
+Origin_Demand    170  170  170  135   170
+MC_DEP             V    V    V    V     V
+VISIBLE_DEP       10   10   10   10    10
+TEMP_DEP          20   20   20   19    20
+Dest_Demand       76  118   78   78    95
+MC_ARR             V    V    I    I     V
+VISIBLE_ARR       10   10   10   10    10
+TEMP_ARR          48   43   20   20    70
+WND_ANGL_x       190  190  190  200   190
+WND_ANGL_y        10  150  210  210    70
+WND_SPED_x        14   14   14   15    14
+WND_SPED_y        16   11   17   17     6
+
+In [19]: X_values['UniqueCarrier'] = pd.factorize(X_values['U
+    ...: niqueCarrier'])[0]
+    ...: X_values['MC_DEP'] = pd.factorize(X_values['MC_DEP']
+    ...: )[0]
+    ...: X_values['MC_ARR'] = pd.factorize(X_values['MC_ARR']
+    ...: )[0]
+    ...:
+    ...: if direction == 'Origin':
+    ...:     X_values['Dest'] = pd.factorize(X_values['Dest']
+    ...: )[0]
+    ...: else:
+    ...:     X_values['Origin'] = pd.factorize(X_values['Orig
+    ...: in'])[0]
+    ...:
+
+In [20]: TrainX, TestX, TrainY, TestY = train_test_split(X_va
+    ...: lues, Y_values, test_size=0.50, random_state=42)
+
+In [21]: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshol
+    ...: d,1,0))
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...: # print results
+    ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+Confusion matrix
+       0     1
+0  24100  3085
+1   6945  6347
+
+precision = 0.67, recall = 0.48, F1 = 0.56, accuracy = 0.75
+
+          0         1
+0  0.886518  0.232094
+1  0.255472  0.477505
+
+In [22]: TrainX, TestX, TrainY, TestY = train_test_split(X_va
+    ...: lues, Y_values, test_size=0.50, random_state=0)
+
+In [23]: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshol
+    ...: d,1,0))
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...: # print results
+    ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+Confusion matrix
+       0     1
+0  23977  3171
+1   6992  6337
+
+precision = 0.67, recall = 0.48, F1 = 0.55, accuracy = 0.75
+
+          0         1
+0  0.883196  0.237902
+1  0.257551  0.475430
+
+In [24]: plt.show()
+
+In [25]: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+Confusion matrix
+       0     1
+0  23977  3171
+1   6992  6337
+
+precision = 0.67, recall = 0.48, F1 = 0.55, accuracy = 0.75
+
+          0         1
+0  0.883196  0.237902
+1  0.257551  0.475430
+
+In [26]: plt.show()
+
+In [27]:     X_values['Origin'] = pd.factorize(X_values['Orig
+    ...: in'])[0]
+    ...:
+    ...: #Selecting 20000 Samples at random and splitting it
+    ...: into training and testing data
+    ...: rows = np.random.choice(X_values.index.values, 20000
+    ...: )
+    ...: sampled_X = X_values.ix[rows]
+    ...: sampled_Y = Y_values.ix[rows]
+    ...: TrainX, TestX, TrainY, TestY = train_test_split(samp
+    ...: led_X, sampled_Y, test_size=0.50, random_state=42)
+    ...:
+    ...: # Create Random Forest classifier with 70 trees
+    ...: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshol
+    ...: d,1,0))
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...: # print results
+    ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...: # plt.savefig("25.png", transparent=True)
+    ...:
+Confusion matrix
+      0     1
+0  6034   567
+1  1821  1578
+
+precision = 0.74, recall = 0.46, F1 = 0.57, accuracy = 0.76
+
+          0         1
+0  0.914104  0.166814
+1  0.275867  0.464254
+
+In [28]:     X_values['Origin'] = pd.factorize(X_values['Orig
+    ...: in'])[0]
+    ...:
+    ...: #Selecting 20000 Samples at random and splitting it
+    ...: into training and testing data
+    ...: rows = np.random.choice(X_values.index.values, 20000
+    ...: )
+    ...: sampled_X = X_values.ix[rows]
+    ...: sampled_Y = Y_values.ix[rows]
+    ...: TrainX, TestX, TrainY, TestY = train_test_split(samp
+    ...: led_X, sampled_Y, test_size=0.50, random_state=42)
+    ...:
+    ...: # Create Random Forest classifier with 70 trees
+    ...: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshol
+    ...: d,1,0))
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...: # print results
+    ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...: # plt.savefig("25.png", transparent=True)
+    ...:
+Confusion matrix
+      0     1
+0  5929   663
+1  1706  1702
+
+precision = 0.72, recall = 0.50, F1 = 0.59, accuracy = 0.76
+
+          0         1
+0  0.899424  0.194542
+1  0.258799  0.499413
+
+In [29]:
+    ...: X_values.head().T
+    ...: #                 37    52    67    68    106
+    ...: # Month             1     1     1     1     1
+    ...: # DayOfWeek         4     4     4     4     4
+    ...: # DepHr            17    19    20    20    18
+    ...: # ArrHr            20    22    22    22    21
+    ...: # UniqueCarrier    CO    AA    UA    AA    UA
+    ...: # Dest            EWR   SAT   SFO   SFO   LAX
+    ...: # CRSElapsedTime  159   180   288   275   270
+    ...: # Distance        719  1041  1846  1846  1745
+    ...: # Origin_Demand   152   170   153   153   169
+    ...: # MC_DEP            V     V     V     V     V
+    ...: # VISIBLE_DEP      10    10    10    10    10
+    ...: # TEMP_DEP         17    19    21    21    18
+    ...: # Dest_Demand      76    22    43    43   103
+    ...: # MC_ARR            V     V     I     I     V
+    ...: # VISIBLE_ARR      10    10     5     5    10
+    ...: # TEMP_ARR         18    44    53    53    57
+    ...:
+    ...: # This clearly indicates that Origin/Dest, UniqueCar
+    ...: rier, MC_ARR, MC_DEP needs Factorization
+    ...: # Factorise the qualitative variables
+    ...: X_values['UniqueCarrier'] = pd.factorize(X_values['U
+    ...: niqueCarrier'])[0]
+    ...: X_values['MC_DEP'] = pd.factorize(X_values['MC_DEP']
+    ...: )[0]
+    ...: X_values['MC_ARR'] = pd.factorize(X_values['MC_ARR']
+    ...: )[0]
+    ...:
+    ...: if direction == 'Origin':
+    ...:     X_values['Dest'] = pd.factorize(X_values['Dest']
+    ...: )[0]
+    ...: else:
+    ...:     X_values['Origin'] = pd.factorize(X_values['Orig
+    ...: in'])[0]
+    ...:
+    
+In [31]:
+    ...: X_values.head().T
+    ...: #                 37    52    67    68    106
+    ...: # Month             1     1     1     1     1
+    ...: # DayOfWeek         4     4     4     4     4
+    ...: # DepHr            17    19    20    20    18
+    ...: # ArrHr            20    22    22    22    21
+    ...: # UniqueCarrier    CO    AA    UA    AA    UA
+    ...: # Dest            EWR   SAT   SFO   SFO   LAX
+    ...: # CRSElapsedTime  159   180   288   275   270
+    ...: # Distance        719  1041  1846  1846  1745
+    ...: # Origin_Demand   152   170   153   153   169
+    ...: # MC_DEP            V     V     V     V     V
+    ...: # VISIBLE_DEP      10    10    10    10    10
+    ...: # TEMP_DEP         17    19    21    21    18
+    ...: # Dest_Demand      76    22    43    43   103
+    ...: # MC_ARR            V     V     I     I     V
+    ...: # VISIBLE_ARR      10    10     5     5    10
+    ...: # TEMP_ARR         18    44    53    53    57
+    ...:
+    ...: # This clearly indicates that Origin/Dest, UniqueCar
+    ...: rier, MC_ARR, MC_DEP needs Factorization
+    ...: # Factorise the qualitative variables
+    ...: X_values['UniqueCarrier'] = pd.factorize(X_values['U
+    ...: niqueCarrier'])[0]
+    ...: X_values['MC_DEP'] = pd.factorize(X_values['MC_DEP']
+    ...: )[0]
+    ...: X_values['MC_ARR'] = pd.factorize(X_values['MC_ARR']
+    ...: )[0]
+    ...:
+    ...: if direction == 'Origin':
+    ...:     X_values['Dest'] = pd.factorize(X_values['Dest']
+    ...: )[0]
+    ...: else:
+    ...:     X_values['Origin'] = pd.factorize(X_values['Orig
+    ...: in'])[0]
+    ...:
+
+
+In [32]: TrainX, TestX, TrainY, TestY = train_test_split(X_va
+    ...: lues, Y_values, test_size=0.50, random_state=42)
+
+In [33]: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, np.where(TrainY >= delay_threshol
+    ...: d,1,0))
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...: # print results
+    ...: cm_rf = confusion_matrix(np.where(TestY >= delay_thr
+    ...: eshold,1,0), pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(np.
+    ...: where(TestY >= delay_threshold,1,0)), list(pred), av
+    ...: erage='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(np.where(TestY >= delay_threshold
+    ...: ,1,0)), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+Confusion matrix
+       0     1
+0  24085  3100
+1   6932  6360
+
+precision = 0.67, recall = 0.48, F1 = 0.56, accuracy = 0.75
+
+          0         1
+0  0.885967  0.233223
+1  0.254994  0.478483
+
+In [34]: plt.savefig("28.1.png", transparent=True)
+
+In [35]: plt.show()
+
+In [36]: RF_scores = cross_val_score(clf_rf, TrainX, np.where
+    ...: (TrainY >= delay_threshold,1,0), cv=10, scoring='acc
+    ...: uracy')
+    ...: print (RF_scores.min(), RF_scores.mean(), RF_scores.
+    ...: max())
+    ...:
+0.742158557669 0.748671864884 0.755248209434
+
+In [37]: test = np.where(TestY >= delay_threshold,1,0)
+    ...: prob = clf_rf.predict_proba(TestX)
+    ...: fpr = dict()
+    ...: tpr = dict()
+    ...: roc_auc = dict()
+    ...: for i in range(2):
+    ...:     fpr[i], tpr[i], _ = metrics.roc_curve(test, prob
+    ...: [:,1])
+    ...:     roc_auc[i] = metrics.auc(fpr[i], tpr[i])
+    ...: print (metrics.roc_auc_score(test, prob[:,1]))
+    ...: plt.figure()
+    ...: plt.plot(fpr[1], tpr[1])
+    ...: plt.xlim([0.0, 1.0])
+    ...: plt.ylim([0.0, 1.05])
+    ...: plt.xlabel('False Positive Rate')
+    ...: plt.ylabel('True Positive Rate')
+    ...: plt.title('Receiver operating characteristic')
+    ...: plt.grid(True)
+    ...: plt.savefig("28.2.png", transparent=True)
+    ...: plt.show()
+    ...: # 0.796212306794
+    ...:
+0.765885938519
+
+In [38]: sm = SMOTE(random_state=42)
+    ...: temp1 = np.where(Y_values>delay_threshold,1,0)
+    ...: Counter(temp1)
+    ...: # Counter({0: 3908966, 1: 914401})
+    ...:
+    ...: X_sampled, Y_sampled = sm.fit_sample(X_values,temp1)
+    ...:
+    ...: Counter(Y_sampled)
+    ...: # Counter({0: 3908966, 1: 3908966})
+    ...: Counter(Y_sampled)[0]+Counter(Y_sampled)[1]
+    ...: # 7817932
+    ...:
+    ...: #Splitting data
+    ...: TrainX, TestX, TrainY, TestY = train_test_split(X_sa
+    ...: mpled,Y_sampled, test_size=0.50, random_state=0)
+    ...:
+    ...: #Training data
+    ...: clf_rf = RandomForestClassifier(n_estimators=70, n_j
+    ...: obs=-1)
+    ...: clf_rf.fit(TrainX, TrainY)
+    ...:
+    ...: # Evaluate on test set
+    ...: pred = clf_rf.predict(TestX)
+    ...:
+    ...: # print results
+    ...: cm_rf = confusion_matrix(TestY, pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(Tes
+    ...: tY), list(pred), average='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(TestY), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+F:\Software\Anaconda\Scripts\ipython-script.py:6: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+F:\Software\Anaconda\Scripts\ipython-script.py:7: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+F:\Software\Anaconda\Scripts\ipython-script.py:8: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+F:\Software\Anaconda\Scripts\ipython-script.py:11: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+Confusion matrix
+        0       1
+0  493677   32733
+1  103557  421874
+
+precision = 0.93, recall = 0.80, F1 = 0.86, accuracy = 0.87
+
+          0         1
+0  0.937818  0.062297
+1  0.196723  0.802910
+
+In [39]: prob = clf_rf.predict_proba(TestX)
+    ...: fpr = dict()
+    ...: tpr = dict()
+    ...: roc_auc = dict()
+    ...: for i in range(2):
+    ...:     fpr[i], tpr[i], _ = metrics.roc_curve(TestY, pro
+    ...: b[:,1])
+    ...:     roc_auc[i] = metrics.auc(fpr[i], tpr[i])
+    ...: print (metrics.roc_auc_score(TestY, prob[:,1]))
+    ...: plt.figure()
+    ...: plt.plot(fpr[1], tpr[1])
+    ...: plt.xlim([0.0, 1.0])
+    ...: plt.ylim([0.0, 1.05])
+    ...: plt.xlabel('False Positive Rate')
+    ...: plt.ylabel('True Positive Rate')
+    ...: plt.title('Receiver operating characteristic')
+    ...: plt.savefig("31.1.png", transparent=True)
+    ...: plt.show()
+    ...:
+0.930786923242
+
+In [40]: pred = clf_rf.predict(TestX)
+    ...:
+    ...: # print results
+    ...: cm_rf = confusion_matrix(TestY, pred)
+    ...: print("Confusion matrix")
+    ...: print(pd.DataFrame(cm_rf))
+    ...: report_rf = precision_recall_fscore_support(list(Tes
+    ...: tY), list(pred), average='binary')
+    ...: print ("\nprecision = %0.2f, recall = %0.2f, F1 = %0
+    ...: .2f, accuracy = %0.2f\n" % \
+    ...:         (report_rf[0], report_rf[1], report_rf[2], a
+    ...: ccuracy_score(list(TestY), list(pred))))
+    ...: print(pd.DataFrame(cm_rf.astype(np.float64) / cm_rf.
+    ...: sum(axis=1)))
+    ...: show_confusion_matrix(cm_rf)
+    ...:
+Confusion matrix
+        0       1
+0  493677   32733
+1  103557  421874
+
+precision = 0.93, recall = 0.80, F1 = 0.86, accuracy = 0.87
+
+          0         1
+0  0.937818  0.062297
+1  0.196723  0.802910
+
+In [41]: RF_scores = cross_val_score(clf_rf, TrainX, TrainY,
+    ...: cv=10, scoring='accuracy')
+    ...: print (RF_scores.min(), RF_scores.mean(), RF_scores.
+    ...: max())
+    ...:
+0.867394280499 0.868735863347 0.870151353818
+
+In [42]:
+
+In [42]:
